@@ -4,12 +4,14 @@ import bot.farm.pd.EventListener;
 import discord4j.core.DiscordClientBuilder;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.Event;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
+@Slf4j
 @Configuration
 public class BeanConfig {
 
@@ -17,25 +19,23 @@ public class BeanConfig {
     private String token;
 
     @Bean
-    public GatewayDiscordClient gatewayDiscordClient() {
-        return DiscordClientBuilder.create(token)
-                .build()
-                .login()
-                .block();
-    }
-
-    @Bean
     public <T extends Event> GatewayDiscordClient gatewayDiscordClient(List<EventListener<T>> eventListeners) {
-        GatewayDiscordClient client = DiscordClientBuilder.create(token)
-                .build()
-                .login()
-                .block();
+        GatewayDiscordClient client = null;
 
-        for(EventListener<T> listener : eventListeners) {
-            client.on(listener.getEventType())
-                    .flatMap(listener::execute)
-                    .onErrorResume(listener::handleError)
-                    .subscribe();
+        try {
+            client = DiscordClientBuilder.create(token)
+                    .build()
+                    .login()
+                    .block();
+
+            for (EventListener<T> listener : eventListeners) {
+                client.on(listener.getEventType())
+                        .flatMap(listener::execute)
+                        .onErrorResume(listener::handleError)
+                        .subscribe();
+            }
+        } catch (Exception exception) {
+            log.error("Be sure to use a valid bot token!", exception);
         }
 
         return client;
