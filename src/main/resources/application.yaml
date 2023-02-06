@@ -1,6 +1,9 @@
 server:
   port: 28882
 
+bot:
+  token:
+
 #datasource settings
 spring:
   datasource:
