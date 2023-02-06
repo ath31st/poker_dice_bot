@@ -1,0 +1,19 @@
+server:
+  port: 28882
+
+#datasource settings
+spring:
+  datasource:
+    url: jdbc:sqlite:./poker_dice.db
+    driver-class-name: org.sqlite.JDBC
+    username: admin
+    password: admin
+
+  #data settings
+  jpa:
+    database-platform: org.sqlite.hibernate.dialect.SQLiteDialect
+    hibernate:
+      ddl-auto: create
+
+    #console settings
+    show-sql: false
