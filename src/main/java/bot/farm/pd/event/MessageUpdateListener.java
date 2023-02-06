@@ -1,4 +1,4 @@
-package bot.farm.pd;
+package bot.farm.pd.event;
 
 import discord4j.core.event.domain.message.MessageUpdateEvent;
 import org.springframework.stereotype.Service;
