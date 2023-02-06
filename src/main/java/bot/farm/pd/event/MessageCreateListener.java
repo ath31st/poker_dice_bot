@@ -14,6 +14,10 @@ public class MessageCreateListener extends MessageListener implements EventListe
 
     @Override
     public Mono<Void> execute(MessageCreateEvent event) {
+        //       System.out.println(eventMessage.getAuthor().get().getUsername());
+//        System.out.println(eventMessage.getAuthorAsMember().block().getDisplayName());
+//        System.out.println(eventMessage.getAuthor().get().getId().asLong());
+
         return processCommand(event.getMessage());
     }
 }
