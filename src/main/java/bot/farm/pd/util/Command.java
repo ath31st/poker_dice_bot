@@ -5,7 +5,9 @@ public enum Command {
     ROLL("/roll"),
     REROLL("/reroll"),
     PASS("/pass"),
-    FINISH("/finish");
+    FINISH("/finish"),
+    HELP("/help"),
+    RULES("/rules");
 
     public final String value;
 
