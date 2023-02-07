@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -71,11 +72,14 @@ public class RoundService {
                     .map(p -> StringUtil.diamondWrapperForId(String.valueOf(p)))
                     .collect(Collectors.joining(" vs "));
 
-            PokerRound pokerRound = new PokerRound();
-            pokerRound.setPlayers(players);
-            pokerRound.setIdChannel(channel.getIdLong());
-            pokerRound.setPlayerInitiator(userInitiator);
-            pokerRound.setEnded(false);
+            PokerRound pokerRound = PokerRound.builder()
+                    .players(players)
+                    .idChannel(channel.getIdLong())
+                    .playerInitiator(userInitiator)
+                    .startRound(LocalDateTime.now())
+                    .actionCounter(players.size() * 2)
+                    .isEnded(false)
+                    .build();
 
             rounds.put(channel.getIdLong(), pokerRound);
 
@@ -106,6 +110,7 @@ public class RoundService {
             pir.setDices(rollDices);
             pir.setRoll(false);
             pokerRound.getPlayers().put(userId, pir);
+            pokerRound.setActionCounter(pokerRound.getActionCounter() - 1);
 
             messageService.sendMessage(message.getChannel(),
                     Objects.requireNonNull(message.getMember()).getNickname() + " ловко бросает кости " +
@@ -133,12 +138,15 @@ public class RoundService {
                 pir.setReroll(false);
                 pir.setPass(false);
                 pokerRound.getPlayers().put(userId, pir);
+                pokerRound.setActionCounter(pokerRound.getActionCounter() - 1);
 
                 messageService.sendMessage(message.getChannel(),
                         Objects.requireNonNull(message.getMember()).getNickname() +
                                 " перебрасывает кости " +
                                 StringUtil.resultWithBrackets(reroll) + "\n" +
                                 "Получилось " + StringUtil.resultWithBrackets(firstRoll));
+
+                checkAvailableActions(message.getChannel(), pokerRound);
             }
         }
     }
@@ -154,9 +162,12 @@ public class RoundService {
             pir.setReroll(false);
             pir.setPass(false);
             pokerRound.getPlayers().put(userId, pir);
+            pokerRound.setActionCounter(pokerRound.getActionCounter() - 1);
 
             messageService.sendMessage(message.getChannel(),
                     Objects.requireNonNull(message.getMember()).getNickname() + " с ухмылкой пропускает ход");
+
+            checkAvailableActions(message.getChannel(), pokerRound);
         }
     }
 
@@ -193,5 +204,17 @@ public class RoundService {
         return !pd.isEnded() &&
                 pd.getPlayers().containsKey(userId) &&
                 pd.getPlayers().get(userId).isRoll();
+    }
+
+    private void checkAvailableActions(MessageChannel channel, PokerRound pd) {
+        if (pd.getActionCounter() > 0) return;
+        saveResultsAndDeleteRound(channel, pd);
+    }
+
+    private void saveResultsAndDeleteRound(MessageChannel channel, PokerRound pd) {
+        //todo print result in chat!
+        //todo save result!
+        rounds.remove(pd.getIdChannel());
+        messageService.sendMessage(channel, "Раунд завершен");
     }
 }
