@@ -2,7 +2,6 @@ package bot.farm.pd.service;
 
 import bot.farm.pd.entity.PlayerInRound;
 import bot.farm.pd.entity.PokerRound;
-import bot.farm.pd.util.Command;
 import bot.farm.pd.util.DiceUtil;
 import bot.farm.pd.util.StringUtil;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +11,6 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,7 +37,7 @@ public class RoundService {
         if (!content.startsWith("!") || content.length() > 200) return;
 
         if (content.startsWith(START.value)) {
-            startNewRound(message.getChannel(), content);
+            startNewRound(message.getChannel(), content, message.getAuthor().getIdLong());
         }
         if (content.equals(ROLL.value)) {
             rollDices(message);
@@ -47,16 +45,17 @@ public class RoundService {
         if (content.startsWith(REROLL.value)) {
             rerollDices(message);
         }
+        if (content.equals(PASS.value)) {
+            pass(message);
+        }
+        if (content.equals(FINISH.value)) {
+            finishRound(message);
+        }
     }
 
-    private boolean checkOccurrence(String command) {
-        if (!command.startsWith("!") || command.length() > 200) return false;
-        return Arrays.stream(Command.values()).anyMatch(c -> c.value.startsWith(command));
-    }
-
-    private void startNewRound(MessageChannel channel, String startCommand) {
+    private void startNewRound(MessageChannel channel, String startCommand, Long userInitiator) {
         if (rounds.containsKey(channel.getIdLong())) {
-            messageService.sendMessage(channel,"Извините, игровой стол сейчас занят");
+            messageService.sendMessage(channel, "Извините, игровой стол сейчас занят");
             return;
         }
 
@@ -75,7 +74,9 @@ public class RoundService {
             PokerRound pokerRound = new PokerRound();
             pokerRound.setPlayers(players);
             pokerRound.setIdChannel(channel.getIdLong());
-            // todo think about cancel round other players
+            pokerRound.setPlayerInitiator(userInitiator);
+            pokerRound.setEnded(false);
+
             rounds.put(channel.getIdLong(), pokerRound);
 
             messageService.sendMessage(channel, message);
@@ -89,8 +90,7 @@ public class RoundService {
         Long chatId = message.getChannel().getIdLong();
         Long userId = message.getAuthor().getIdLong();
 
-        if (rounds.containsKey(chatId) && rounds.get(chatId).getPlayers().containsKey(userId) &&
-                rounds.get(chatId).getPlayers().get(userId).isRoll()) {
+        if (checkRollAvailable(chatId, userId)) {
             PokerRound pokerRound = rounds.get(chatId);
             PlayerInRound pir = pokerRound.getPlayers().get(userId);
 
@@ -117,8 +117,7 @@ public class RoundService {
         Long chatId = message.getChannel().getIdLong();
         Long userId = message.getAuthor().getIdLong();
 
-        if (rounds.containsKey(chatId) && rounds.get(chatId).getPlayers().containsKey(userId) &&
-                rounds.get(chatId).getPlayers().get(userId).isReroll()) {
+        if (checkRerollOrPassAvailable(chatId, userId)) {
             Pattern pattern = Pattern.compile("^" + REROLL.value + "( [1-6]){1,5}$");
             Matcher matcher = pattern.matcher(message.getContentRaw());
 
@@ -142,6 +141,57 @@ public class RoundService {
                                 "Получилось " + StringUtil.resultWithBrackets(firstRoll));
             }
         }
+    }
 
+    private void pass(Message message) {
+        Long chatId = message.getChannel().getIdLong();
+        Long userId = message.getAuthor().getIdLong();
+
+        if (checkRerollOrPassAvailable(chatId, userId)) {
+            PokerRound pokerRound = rounds.get(chatId);
+            PlayerInRound pir = pokerRound.getPlayers().get(userId);
+
+            pir.setReroll(false);
+            pir.setPass(false);
+            pokerRound.getPlayers().put(userId, pir);
+
+            messageService.sendMessage(message.getChannel(),
+                    Objects.requireNonNull(message.getMember()).getNickname() + " с ухмылкой пропускает ход");
+        }
+    }
+
+    private void finishRound(Message message) {
+        Long chatId = message.getChannel().getIdLong();
+        Long userId = message.getAuthor().getIdLong();
+
+        if (rounds.containsKey(chatId) && rounds.get(chatId).getPlayerInitiator().equals(userId)) {
+            PokerRound pokerRound = rounds.get(chatId);
+            pokerRound.setEnded(true);
+
+            rounds.remove(chatId);
+
+            messageService.sendMessage(message.getChannel(),
+                    Objects.requireNonNull(message.getMember()).getNickname() +
+                            " досрочно завершает раунд, результаты будут аннулированы");
+        }
+    }
+
+    private boolean checkRerollOrPassAvailable(Long chatId, Long userId) {
+        if (!rounds.containsKey(chatId)) return false;
+
+        PokerRound pd = rounds.get(chatId);
+        return pd.getPlayers().containsKey(userId) &&
+                !pd.isEnded() &&
+                pd.getPlayers().get(userId).isReroll() &&
+                pd.getPlayers().get(userId).isPass();
+    }
+
+    private boolean checkRollAvailable(Long chatId, Long userId) {
+        if (!rounds.containsKey(chatId)) return false;
+
+        PokerRound pd = rounds.get(chatId);
+        return !pd.isEnded() &&
+                pd.getPlayers().containsKey(userId) &&
+                pd.getPlayers().get(userId).isRoll();
     }
 }
