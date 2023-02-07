@@ -13,4 +13,18 @@ public class DiceUtil {
         Arrays.sort(arr);
         return arr;
     }
+
+    public static int[] reroll(int[] firstRoll, int[] reroll) {
+        Random random = new Random();
+        for (int k : reroll) {
+            for (int j = 0; j < firstRoll.length; j++) {
+                if (firstRoll[j] == k) {
+                    firstRoll[j] = random.nextInt(1, 7);
+                    break;
+                }
+            }
+        }
+        Arrays.sort(firstRoll);
+        return firstRoll;
+    }
 }

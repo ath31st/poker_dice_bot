@@ -43,22 +43,13 @@ public class RoundService {
         if (content.startsWith(ROLL.value)) {
             rollDices(message);
         }
+        if (content.startsWith(REROLL.value)) {
+            rerollDices(message);
+        }
     }
 
     private boolean checkOccurrence(String command) {
         if (!command.startsWith("!") || command.length() > 200) return false;
-
-        Pattern pattern = null;
-        if (command.startsWith(START.value)) {
-            pattern = Pattern.compile("^" + START.value + " (<@[0-9]{18}>){2,}$");
-        } else if (command.startsWith(REROLL.value)) {
-            pattern = Pattern.compile("^" + REROLL.value + "( [0-9]){1,5}$");
-        }
-        if (pattern != null) {
-            Matcher matcher = pattern.matcher(command);
-            if (matcher.matches()) return true;
-        }
-
         return Arrays.stream(Command.values()).anyMatch(c -> c.value.startsWith(command));
     }
 
@@ -92,7 +83,8 @@ public class RoundService {
         Long chatId = message.getChannel().getIdLong();
         Long userId = message.getAuthor().getIdLong();
 
-        if (rounds.containsKey(chatId) && rounds.get(chatId).getPlayers().containsKey(userId)) {
+        if (rounds.containsKey(chatId) && rounds.get(chatId).getPlayers().containsKey(userId) &&
+                rounds.get(chatId).getPlayers().get(userId)[0] == 0) {
             PokerRound pokerRound = rounds.get(chatId);
 
             if (!playerService.existsPlayer(userId)) {
@@ -102,12 +94,39 @@ public class RoundService {
                         message.getAuthor().getDiscriminator());
             }
 
-            pokerRound.getPlayers().put(userId, DiceUtil.roll5d6());
+            int[] rollDices = DiceUtil.roll5d6();
+
+            pokerRound.getPlayers().put(userId, rollDices);
+
+            messageService.sendMessage(message.getChannel(),
+                    Objects.requireNonNull(message.getMember()).getNickname() + " ловко бросает кости [" +
+                            Arrays.stream(rollDices).mapToObj(String::valueOf).collect(Collectors.joining("] [")) + "]");
         }
     }
 
-    private void rerollDices(String reroll) {
-        Pattern pattern = Pattern.compile("^" + REROLL.value + "( [0-9]){1,5}$");
-        Matcher matcher = pattern.matcher(reroll);
+    private void rerollDices(Message message) {
+        Long chatId = message.getChannel().getIdLong();
+        Long userId = message.getAuthor().getIdLong();
+
+        if (rounds.containsKey(chatId) && rounds.get(chatId).getPlayers().containsKey(userId) &&
+                rounds.get(chatId).getPlayers().get(userId)[0] != 0) {
+            Pattern pattern = Pattern.compile("^" + REROLL.value + "( [1-6]){1,5}$");
+            Matcher matcher = pattern.matcher(message.getContentRaw());
+
+            if (matcher.matches()) {
+                PokerRound pokerRound = rounds.get(chatId);
+                int[] reroll = StringUtil.getRerollNumbers(message.getContentRaw());
+                int[] firstRoll = pokerRound.getPlayers().get(userId);
+                DiceUtil.reroll(firstRoll, reroll);
+
+                pokerRound.getPlayers().put(userId, firstRoll);
+
+                messageService.sendMessage(message.getChannel(),
+                        Objects.requireNonNull(message.getMember()).getNickname() + " перебрасывает кости [" +
+                                Arrays.stream(reroll).mapToObj(String::valueOf).collect(Collectors.joining("] [")) + "]\n" +
+                                "Получилось [" + Arrays.stream(firstRoll).mapToObj(String::valueOf).collect(Collectors.joining("] [")) + "]");
+            }
+        }
+
     }
 }

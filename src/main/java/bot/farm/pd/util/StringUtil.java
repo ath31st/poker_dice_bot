@@ -7,18 +7,28 @@ import java.util.stream.Collectors;
 public class StringUtil {
 
     public static String getIdFromBrackets(String userId) {
-        return userId.replaceAll("<@|>"," ").trim().replaceAll("\\s+", " ");
+        return userId.replaceAll("<@|>", " ").trim().replaceAll("\\s+", " ");
     }
+
     public static String diamondWrapperForId(String userId) {
         return "<@" + userId + ">";
     }
+
     public static Set<String> getPlayersId(String command) {
 
         return Arrays.stream(command.substring(command.indexOf(" "))
-                .replaceAll("<@|>"," ")
-                .trim()
-                .replaceAll("\\s+", " ")
-                .split(" "))
+                        .replaceAll("<@|>", " ")
+                        .trim()
+                        .replaceAll("\\s+", " ")
+                        .split(" "))
                 .collect(Collectors.toSet());
+    }
+
+    public static int[] getRerollNumbers(String command) {
+        return Arrays.stream(command.substring(command.indexOf(" "))
+                .trim()
+                .split(" "))
+                .mapToInt(Integer::valueOf)
+                .toArray();
     }
 }
