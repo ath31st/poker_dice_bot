@@ -13,6 +13,8 @@ public class StatService {
     public void onMessageReceived(MessageReceivedEvent event) {
         if (event.getAuthor().isBot()) return;
 
+        System.out.println(event.getAuthor().getName());
+        System.out.println(event.getMember().getNickname());
         System.out.println(event.getAuthor().getId());
         System.out.println(event.getMessage().getContentRaw());
         System.out.println(event.getChannel().getId());
@@ -21,9 +23,5 @@ public class StatService {
         String content = message.getContentRaw();
 
         if (!content.startsWith("!") || content.length() > 200) return;
-
-        System.out.println(event.getAuthor().getName());
-        System.out.println(event.getMember().getNickname());
-
     }
 }

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
@@ -92,7 +93,19 @@ public class RoundService {
 
         if (rounds.containsKey(chatId) && rounds.get(chatId).getPlayers().containsKey(userId)) {
             PokerRound pokerRound = rounds.get(chatId);
-            Player
+            Player player;
+
+            if (playerService.existsPlayer(userId)) {
+                player = playerService.getPlayerById(userId).get();
+            } else {
+                player = playerService.saveNewPlayer(userId,
+                        message.getAuthor().getName(),
+                        Objects.requireNonNull(message.getMember()).getNickname(),
+                        message.getAuthor().getDiscriminator());
+            }
+
+            pokerRound.getPlayers().put(player.getId(), player);
+
         }
     }
 
