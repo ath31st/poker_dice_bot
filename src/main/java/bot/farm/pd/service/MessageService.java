@@ -11,4 +11,5 @@ public class MessageService {
     public void sendMessage(MessageChannel channel, String message) {
         channel.sendMessage(message).queue();
     }
+
 }
