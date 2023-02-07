@@ -13,15 +13,16 @@ import java.util.Optional;
 public class PlayerService {
     private final PlayerRepository playerRepository;
 
-    public Player saveNewPlayer(Long id, String username, String nickname, String discriminator) {
+    public void saveNewPlayer(Long id, String username, String nickname, String discriminator) {
         Player p = Player.builder()
                 .id(id)
                 .username(username)
                 .nickname(nickname)
                 .discriminator(discriminator)
+                .score(0L)
                 .build();
 
-        return playerRepository.save(p);
+        playerRepository.save(p);
     }
 
     public Optional<Player> getPlayerById(Long id) {
@@ -38,6 +39,7 @@ public class PlayerService {
                 .isPass(true)
                 .isReroll(true)
                 .dices(new int[5])
+                .score(0)
                 .build();
     }
 }

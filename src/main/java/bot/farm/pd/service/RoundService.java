@@ -41,7 +41,7 @@ public class RoundService {
         if (content.startsWith(START.value)) {
             startNewRound(message.getChannel(), content);
         }
-        if (content.startsWith(ROLL.value)) {
+        if (content.equals(ROLL.value)) {
             rollDices(message);
         }
         if (content.startsWith(REROLL.value)) {
@@ -55,6 +55,11 @@ public class RoundService {
     }
 
     private void startNewRound(MessageChannel channel, String startCommand) {
+        if (rounds.containsKey(channel.getIdLong())) {
+            messageService.sendMessage(channel,"Извините, игровой стол сейчас занят");
+            return;
+        }
+
         Pattern pattern = Pattern.compile("^" + START.value + " (<@[0-9]{18}>){2,}$");
         Matcher matcher = pattern.matcher(startCommand);
 

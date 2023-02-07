@@ -19,4 +19,5 @@ public class Player {
     private String username;
     private String nickname;
     private String discriminator;
+    private Long score;
 }

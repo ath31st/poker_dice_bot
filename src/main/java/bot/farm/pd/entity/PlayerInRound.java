@@ -11,5 +11,6 @@ public class PlayerInRound {
     private boolean isReroll;
     private boolean isPass;
     private int[] dices;
+    private int score;
 
 }
