@@ -11,6 +11,6 @@ import java.util.Map;
 @NoArgsConstructor
 public class PokerRound {
     private Long idChannel;
-    private Map<Long, Player> players;
+    private Map<Long, int[]> players;
 
 }

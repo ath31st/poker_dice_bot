@@ -1,8 +1,8 @@
 package bot.farm.pd.service;
 
-import bot.farm.pd.entity.Player;
 import bot.farm.pd.entity.PokerRound;
 import bot.farm.pd.util.Command;
+import bot.farm.pd.util.DiceUtil;
 import bot.farm.pd.util.StringUtil;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.entities.Message;
@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,7 +41,7 @@ public class RoundService {
             startNewRound(message.getChannel(), content);
         }
         if (content.startsWith(ROLL.value)) {
-            rollDice(message);
+            rollDices(message);
         }
     }
 
@@ -66,7 +65,9 @@ public class RoundService {
     private void startNewRound(MessageChannel channel, String startCommand) {
         Pattern pattern = Pattern.compile("^" + START.value + " (<@[0-9]{18}>){2,}$");
         Matcher matcher = pattern.matcher(startCommand);
-        Map<Long, Player> players = StringUtil.getPlayersId(startCommand).stream().collect(Collectors.toMap(Long::valueOf, v -> new Player()));
+
+        Map<Long, int[]> players = StringUtil.getPlayersId(startCommand).stream()
+                .collect(Collectors.toMap(Long::valueOf, v -> new int[5]));
 
         if (matcher.matches() && players.size() > 1) {
             String message = "Начинается новый раунд покера с костями!\n"
@@ -87,29 +88,25 @@ public class RoundService {
 
     }
 
-    private void rollDice(Message message) {
+    private void rollDices(Message message) {
         Long chatId = message.getChannel().getIdLong();
         Long userId = message.getAuthor().getIdLong();
 
         if (rounds.containsKey(chatId) && rounds.get(chatId).getPlayers().containsKey(userId)) {
             PokerRound pokerRound = rounds.get(chatId);
-            Player player;
 
-            if (playerService.existsPlayer(userId)) {
-                player = playerService.getPlayerById(userId).get();
-            } else {
-                player = playerService.saveNewPlayer(userId,
+            if (!playerService.existsPlayer(userId)) {
+                playerService.saveNewPlayer(userId,
                         message.getAuthor().getName(),
                         Objects.requireNonNull(message.getMember()).getNickname(),
                         message.getAuthor().getDiscriminator());
             }
 
-            pokerRound.getPlayers().put(player.getId(), player);
-
+            pokerRound.getPlayers().put(userId, DiceUtil.roll5d6());
         }
     }
 
-    private void rerollDice(String reroll) {
+    private void rerollDices(String reroll) {
         Pattern pattern = Pattern.compile("^" + REROLL.value + "( [0-9]){1,5}$");
         Matcher matcher = pattern.matcher(reroll);
     }
