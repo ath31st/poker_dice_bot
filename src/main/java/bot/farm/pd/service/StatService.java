@@ -15,6 +15,7 @@ public class StatService {
 
         System.out.println(event.getAuthor().getId());
         System.out.println(event.getMessage().getContentRaw());
+        System.out.println(event.getChannel().getId());
 
         Message message = event.getMessage();
         String content = message.getContentRaw();
