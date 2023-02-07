@@ -1,6 +1,7 @@
 package bot.farm.pd.service;
 
 import bot.farm.pd.entity.Player;
+import bot.farm.pd.entity.PlayerInRound;
 import bot.farm.pd.repository.PlayerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,5 +30,14 @@ public class PlayerService {
 
     public boolean existsPlayer(Long id) {
         return playerRepository.existsById(id);
+    }
+
+    public PlayerInRound createPiR() {
+        return PlayerInRound.builder()
+                .isRoll(true)
+                .isPass(true)
+                .isReroll(true)
+                .dices(new int[5])
+                .build();
     }
 }

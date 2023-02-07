@@ -1,5 +1,6 @@
 package bot.farm.pd.service;
 
+import bot.farm.pd.entity.PlayerInRound;
 import bot.farm.pd.entity.PokerRound;
 import bot.farm.pd.util.Command;
 import bot.farm.pd.util.DiceUtil;
@@ -57,8 +58,8 @@ public class RoundService {
         Pattern pattern = Pattern.compile("^" + START.value + " (<@[0-9]{18}>){2,}$");
         Matcher matcher = pattern.matcher(startCommand);
 
-        Map<Long, int[]> players = StringUtil.getPlayersId(startCommand).stream()
-                .collect(Collectors.toMap(Long::valueOf, v -> new int[5]));
+        Map<Long, PlayerInRound> players = StringUtil.getPlayersId(startCommand).stream()
+                .collect(Collectors.toMap(Long::valueOf, v -> playerService.createPiR()));
 
         if (matcher.matches() && players.size() > 1) {
             String message = "Начинается новый раунд покера с костями!\n"
@@ -84,8 +85,9 @@ public class RoundService {
         Long userId = message.getAuthor().getIdLong();
 
         if (rounds.containsKey(chatId) && rounds.get(chatId).getPlayers().containsKey(userId) &&
-                rounds.get(chatId).getPlayers().get(userId)[0] == 0) {
+                rounds.get(chatId).getPlayers().get(userId).isRoll()) {
             PokerRound pokerRound = rounds.get(chatId);
+            PlayerInRound pir = pokerRound.getPlayers().get(userId);
 
             if (!playerService.existsPlayer(userId)) {
                 playerService.saveNewPlayer(userId,
@@ -96,11 +98,13 @@ public class RoundService {
 
             int[] rollDices = DiceUtil.roll5d6();
 
-            pokerRound.getPlayers().put(userId, rollDices);
+            pir.setDices(rollDices);
+            pir.setRoll(false);
+            pokerRound.getPlayers().put(userId, pir);
 
             messageService.sendMessage(message.getChannel(),
-                    Objects.requireNonNull(message.getMember()).getNickname() + " ловко бросает кости [" +
-                            Arrays.stream(rollDices).mapToObj(String::valueOf).collect(Collectors.joining("] [")) + "]");
+                    Objects.requireNonNull(message.getMember()).getNickname() + " ловко бросает кости " +
+                            StringUtil.resultWithBrackets(rollDices));
         }
     }
 
@@ -109,22 +113,28 @@ public class RoundService {
         Long userId = message.getAuthor().getIdLong();
 
         if (rounds.containsKey(chatId) && rounds.get(chatId).getPlayers().containsKey(userId) &&
-                rounds.get(chatId).getPlayers().get(userId)[0] != 0) {
+                rounds.get(chatId).getPlayers().get(userId).isReroll()) {
             Pattern pattern = Pattern.compile("^" + REROLL.value + "( [1-6]){1,5}$");
             Matcher matcher = pattern.matcher(message.getContentRaw());
 
             if (matcher.matches()) {
                 PokerRound pokerRound = rounds.get(chatId);
+                PlayerInRound pir = pokerRound.getPlayers().get(userId);
+
                 int[] reroll = StringUtil.getRerollNumbers(message.getContentRaw());
-                int[] firstRoll = pokerRound.getPlayers().get(userId);
+                int[] firstRoll = pir.getDices();
                 DiceUtil.reroll(firstRoll, reroll);
 
-                pokerRound.getPlayers().put(userId, firstRoll);
+                pir.setDices(firstRoll);
+                pir.setReroll(false);
+                pir.setPass(false);
+                pokerRound.getPlayers().put(userId, pir);
 
                 messageService.sendMessage(message.getChannel(),
-                        Objects.requireNonNull(message.getMember()).getNickname() + " перебрасывает кости [" +
-                                Arrays.stream(reroll).mapToObj(String::valueOf).collect(Collectors.joining("] [")) + "]\n" +
-                                "Получилось [" + Arrays.stream(firstRoll).mapToObj(String::valueOf).collect(Collectors.joining("] [")) + "]");
+                        Objects.requireNonNull(message.getMember()).getNickname() +
+                                " перебрасывает кости " +
+                                StringUtil.resultWithBrackets(reroll) + "\n" +
+                                "Получилось " + StringUtil.resultWithBrackets(firstRoll));
             }
         }
 

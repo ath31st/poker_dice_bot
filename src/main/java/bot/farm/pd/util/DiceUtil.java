@@ -14,7 +14,7 @@ public class DiceUtil {
         return arr;
     }
 
-    public static int[] reroll(int[] firstRoll, int[] reroll) {
+    public static void reroll(int[] firstRoll, int[] reroll) {
         Random random = new Random();
         for (int k : reroll) {
             for (int j = 0; j < firstRoll.length; j++) {
@@ -25,6 +25,5 @@ public class DiceUtil {
             }
         }
         Arrays.sort(firstRoll);
-        return firstRoll;
     }
 }

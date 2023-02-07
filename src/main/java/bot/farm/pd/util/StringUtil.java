@@ -31,4 +31,8 @@ public class StringUtil {
                 .mapToInt(Integer::valueOf)
                 .toArray();
     }
+
+    public static String resultWithBrackets(int[] array) {
+        return "[" + Arrays.stream(array).mapToObj(String::valueOf).collect(Collectors.joining("] [")) + "]";
+    }
 }
