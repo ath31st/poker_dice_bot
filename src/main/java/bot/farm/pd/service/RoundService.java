@@ -72,7 +72,7 @@ public class RoundService {
                     .map(p -> StringUtil.diamondWrapperForId(String.valueOf(p)))
                     .collect(Collectors.joining(" vs "));
 
-            PokerRound pokerRound = PokerRound.builder()
+            PokerRound pr = PokerRound.builder()
                     .players(players)
                     .idChannel(channel.getIdLong())
                     .playerInitiator(userInitiator)
@@ -81,7 +81,7 @@ public class RoundService {
                     .isEnded(false)
                     .build();
 
-            rounds.put(channel.getIdLong(), pokerRound);
+            rounds.put(channel.getIdLong(), pr);
 
             messageService.sendMessage(channel, message);
         } else {
@@ -95,8 +95,8 @@ public class RoundService {
         Long userId = message.getAuthor().getIdLong();
 
         if (checkRollAvailable(chatId, userId)) {
-            PokerRound pokerRound = rounds.get(chatId);
-            PlayerInRound pir = pokerRound.getPlayers().get(userId);
+            PokerRound pr = rounds.get(chatId);
+            PlayerInRound pir = pr.getPlayers().get(userId);
 
             if (!playerService.existsPlayer(userId)) {
                 playerService.saveNewPlayer(userId,
@@ -109,8 +109,8 @@ public class RoundService {
 
             pir.setDices(rollDices);
             pir.setRoll(false);
-            pokerRound.getPlayers().put(userId, pir);
-            pokerRound.setActionCounter(pokerRound.getActionCounter() - 1);
+            pr.getPlayers().put(userId, pir);
+            pr.setActionCounter(pr.getActionCounter() - 1);
 
             messageService.sendMessage(message.getChannel(),
                     Objects.requireNonNull(message.getMember()).getNickname() + " ловко бросает кости " +
@@ -127,8 +127,8 @@ public class RoundService {
             Matcher matcher = pattern.matcher(message.getContentRaw());
 
             if (matcher.matches()) {
-                PokerRound pokerRound = rounds.get(chatId);
-                PlayerInRound pir = pokerRound.getPlayers().get(userId);
+                PokerRound pr = rounds.get(chatId);
+                PlayerInRound pir = pr.getPlayers().get(userId);
 
                 int[] reroll = StringUtil.getRerollNumbers(message.getContentRaw());
                 int[] firstRoll = pir.getDices();
@@ -137,8 +137,8 @@ public class RoundService {
                 pir.setDices(firstRoll);
                 pir.setReroll(false);
                 pir.setPass(false);
-                pokerRound.getPlayers().put(userId, pir);
-                pokerRound.setActionCounter(pokerRound.getActionCounter() - 1);
+                pr.getPlayers().put(userId, pir);
+                pr.setActionCounter(pr.getActionCounter() - 1);
 
                 messageService.sendMessage(message.getChannel(),
                         Objects.requireNonNull(message.getMember()).getNickname() +
@@ -146,7 +146,7 @@ public class RoundService {
                                 StringUtil.resultWithBrackets(reroll) + "\n" +
                                 "Получилось " + StringUtil.resultWithBrackets(firstRoll));
 
-                checkAvailableActions(message.getChannel(), pokerRound);
+                checkAvailableActions(message.getChannel(), pr);
             }
         }
     }
@@ -156,18 +156,18 @@ public class RoundService {
         Long userId = message.getAuthor().getIdLong();
 
         if (checkRerollOrPassAvailable(chatId, userId)) {
-            PokerRound pokerRound = rounds.get(chatId);
-            PlayerInRound pir = pokerRound.getPlayers().get(userId);
+            PokerRound pr = rounds.get(chatId);
+            PlayerInRound pir = pr.getPlayers().get(userId);
 
             pir.setReroll(false);
             pir.setPass(false);
-            pokerRound.getPlayers().put(userId, pir);
-            pokerRound.setActionCounter(pokerRound.getActionCounter() - 1);
+            pr.getPlayers().put(userId, pir);
+            pr.setActionCounter(pr.getActionCounter() - 1);
 
             messageService.sendMessage(message.getChannel(),
                     Objects.requireNonNull(message.getMember()).getNickname() + " с ухмылкой пропускает ход");
 
-            checkAvailableActions(message.getChannel(), pokerRound);
+            checkAvailableActions(message.getChannel(), pr);
         }
     }
 
@@ -190,31 +190,31 @@ public class RoundService {
     private boolean checkRerollOrPassAvailable(Long chatId, Long userId) {
         if (!rounds.containsKey(chatId)) return false;
 
-        PokerRound pd = rounds.get(chatId);
-        return pd.getPlayers().containsKey(userId) &&
-                !pd.isEnded() &&
-                pd.getPlayers().get(userId).isReroll() &&
-                pd.getPlayers().get(userId).isPass();
+        PokerRound pr = rounds.get(chatId);
+        return pr.getPlayers().containsKey(userId) &&
+                !pr.isEnded() &&
+                pr.getPlayers().get(userId).isReroll() &&
+                pr.getPlayers().get(userId).isPass();
     }
 
     private boolean checkRollAvailable(Long chatId, Long userId) {
         if (!rounds.containsKey(chatId)) return false;
 
-        PokerRound pd = rounds.get(chatId);
-        return !pd.isEnded() &&
-                pd.getPlayers().containsKey(userId) &&
-                pd.getPlayers().get(userId).isRoll();
+        PokerRound pr = rounds.get(chatId);
+        return !pr.isEnded() &&
+                pr.getPlayers().containsKey(userId) &&
+                pr.getPlayers().get(userId).isRoll();
     }
 
-    private void checkAvailableActions(MessageChannel channel, PokerRound pd) {
-        if (pd.getActionCounter() > 0) return;
-        saveResultsAndDeleteRound(channel, pd);
+    private void checkAvailableActions(MessageChannel channel, PokerRound pr) {
+        if (pr.getActionCounter() > 0) return;
+        saveResultsAndDeleteRound(channel, pr);
     }
 
-    private void saveResultsAndDeleteRound(MessageChannel channel, PokerRound pd) {
+    private void saveResultsAndDeleteRound(MessageChannel channel, PokerRound pr) {
         //todo print result in chat!
         //todo save result!
-        rounds.remove(pd.getIdChannel());
+        rounds.remove(pr.getIdChannel());
         messageService.sendMessage(channel, "Раунд завершен");
     }
 }

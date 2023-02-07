@@ -3,6 +3,8 @@ server:
 
 bot:
   token:
+round:
+  duration: 3
 
 #datasource settings
 spring:
