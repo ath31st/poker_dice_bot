@@ -35,7 +35,7 @@ public class RoundService {
             return;
         }
 
-        Pattern pattern = Pattern.compile("^" + START.value + " (<@[0-9]{18}>){2,}$");
+        Pattern pattern = Pattern.compile("^" + START.value + " (<@[0-9]{18}>\\s?){2,}$");
         Matcher matcher = pattern.matcher(startCommand);
 
         Map<Long, PlayerInRound> players = StringUtil.getPlayersId(startCommand).stream()
@@ -59,10 +59,7 @@ public class RoundService {
             rounds.put(channel.getIdLong(), pr);
 
             messageService.sendMessage(channel, message);
-        } else {
-            messageService.sendMessage(channel, "Error!");
         }
-
     }
 
     public void rollDices(Message message) {
