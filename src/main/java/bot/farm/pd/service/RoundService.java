@@ -7,8 +7,6 @@ import bot.farm.pd.util.StringUtil;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -19,7 +17,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static bot.farm.pd.util.Command.*;
+import static bot.farm.pd.util.Command.REROLL;
+import static bot.farm.pd.util.Command.START;
 
 @Service
 @RequiredArgsConstructor
@@ -28,33 +27,7 @@ public class RoundService {
     private final PlayerService playerService;
     private final ConcurrentHashMap<Long, PokerRound> rounds;
 
-    @SubscribeEvent
-    public void onMessageReceived(MessageReceivedEvent event) {
-        if (event.getAuthor().isBot()) return;
-
-        Message message = event.getMessage();
-        String content = message.getContentRaw();
-
-        if (!content.startsWith("!") || content.length() > 200) return;
-
-        if (content.startsWith(START.value)) {
-            startNewRound(message.getChannel(), content, message.getAuthor().getIdLong());
-        }
-        if (content.equals(ROLL.value)) {
-            rollDices(message);
-        }
-        if (content.startsWith(REROLL.value)) {
-            rerollDices(message);
-        }
-        if (content.equals(PASS.value)) {
-            pass(message);
-        }
-        if (content.equals(FINISH.value)) {
-            finishRound(message);
-        }
-    }
-
-    private void startNewRound(MessageChannel channel, String startCommand, Long userInitiator) {
+    public void startNewRound(MessageChannel channel, String startCommand, Long userInitiator) {
         if (rounds.containsKey(channel.getIdLong())) {
             messageService.sendMessage(channel, "Извините, игровой стол сейчас занят");
             return;
@@ -90,7 +63,7 @@ public class RoundService {
 
     }
 
-    private void rollDices(Message message) {
+    public void rollDices(Message message) {
         Long chatId = message.getChannel().getIdLong();
         Long userId = message.getAuthor().getIdLong();
 
@@ -119,7 +92,7 @@ public class RoundService {
         }
     }
 
-    private void rerollDices(Message message) {
+    public void rerollDices(Message message) {
         Long chatId = message.getChannel().getIdLong();
         Long userId = message.getAuthor().getIdLong();
 
@@ -153,7 +126,7 @@ public class RoundService {
         }
     }
 
-    private void pass(Message message) {
+    public void pass(Message message) {
         Long chatId = message.getChannel().getIdLong();
         Long userId = message.getAuthor().getIdLong();
 
@@ -174,7 +147,7 @@ public class RoundService {
         }
     }
 
-    private void finishRound(Message message) {
+    public void finishRound(Message message) {
         Long chatId = message.getChannel().getIdLong();
         Long userId = message.getAuthor().getIdLong();
 

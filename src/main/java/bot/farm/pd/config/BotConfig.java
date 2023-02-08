@@ -1,7 +1,7 @@
 package bot.farm.pd.config;
 
-import bot.farm.pd.service.RoundService;
-import bot.farm.pd.service.StatService;
+import bot.farm.pd.listener.RoundListener;
+import bot.farm.pd.listener.StatListener;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
@@ -16,8 +16,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @RequiredArgsConstructor
 public class BotConfig {
-    private final RoundService roundService;
-    private final StatService statService;
+    private final RoundListener roundListener;
+    private final StatListener statListener;
     @Value("${bot.token}")
     private String token;
 
@@ -26,7 +26,7 @@ public class BotConfig {
         return JDABuilder.createDefault(token)
                 .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES, GatewayIntent.DIRECT_MESSAGES)
                 .setEventManager(new AnnotatedEventManager())
-                .addEventListeners(roundService, statService)
+                .addEventListeners(roundListener, statListener)
                 .build();
     }
 }
