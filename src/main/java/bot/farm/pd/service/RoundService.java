@@ -2,6 +2,7 @@ package bot.farm.pd.service;
 
 import bot.farm.pd.entity.PlayerInRound;
 import bot.farm.pd.entity.PokerRound;
+import bot.farm.pd.entity.RoundResult;
 import bot.farm.pd.util.DiceUtil;
 import bot.farm.pd.util.StringUtil;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ import static bot.farm.pd.util.Command.START;
 public class RoundService {
     private final MessageService messageService;
     private final PlayerService playerService;
+    private final ScoreService scoreService;
     private final ConcurrentHashMap<Long, PokerRound> rounds;
 
     public void startNewRound(MessageChannel channel, String startCommand, Long userInitiator) {
@@ -70,6 +72,8 @@ public class RoundService {
         if (checkRollAvailable(chatId, userId)) {
             PokerRound pr = rounds.get(chatId);
             PlayerInRound pir = pr.getPlayers().get(userId);
+            String playerName = message.getMember().getNickname() == null ?
+                    message.getAuthor().getName() : message.getMember().getNickname();
 
             if (!playerService.existsPlayer(userId)) {
                 playerService.saveNewPlayer(userId,
@@ -80,12 +84,12 @@ public class RoundService {
 
             int[] rollDices = DiceUtil.roll5d6();
 
+            pir.setName(playerName);
             pir.setDices(rollDices);
             pir.setRoll(false);
             pr.getPlayers().put(userId, pir);
             pr.setActionCounter(pr.getActionCounter() - 1);
 
-            String playerName = message.getMember().getNickname() == null ? message.getAuthor().getName() : message.getMember().getNickname();
             messageService.sendMessage(message.getChannel(),
                     playerName + " ловко бросает кости " +
                             StringUtil.resultWithBrackets(rollDices));
@@ -191,7 +195,8 @@ public class RoundService {
     private void saveResultsAndDeleteRound(MessageChannel channel, PokerRound pr) {
         //todo print result in chat!
         //todo save result!
+        Map<Long, RoundResult> result = scoreService.processingRoundResult(pr);
         rounds.remove(pr.getIdChannel());
-        messageService.sendMessage(channel, "Раунд завершен");
+        messageService.sendResult(channel, result, pr.getPlayers());
     }
 }

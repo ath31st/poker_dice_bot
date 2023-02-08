@@ -16,12 +16,12 @@ import static bot.farm.pd.util.DiceUtil.*;
 @Service
 @RequiredArgsConstructor
 public class ScoreService {
-    private final MessageService messageService;
-
-    public void processingRoundResult(PokerRound pr) {
+    public Map<Long, RoundResult> processingRoundResult(PokerRound pr) {
         Map<Long, PlayerInRound> players = pr.getPlayers();
         Map<Long, RoundResult> result = new HashMap<>();
         players.forEach((key, value) -> result.put(key, getRoundResult(value.getDices())));
+
+        return result;
     }
 
     private RoundResult getRoundResult(int[] dices) {

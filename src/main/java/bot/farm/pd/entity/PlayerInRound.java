@@ -7,6 +7,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class PlayerInRound {
+    private String name;
     private boolean isRoll;
     private boolean isReroll;
     private boolean isPass;

@@ -41,7 +41,7 @@ public class DiceUtil {
 
     public static boolean isFullHouse(int[] dices) {
         Map<Integer, Long> map = Arrays.stream(dices).boxed().collect(Collectors.groupingBy(x -> x, Collectors.counting()));
-        return map.size() == 2 & map.get(dices[0]) > 1 & map.get(dices.length - 1) > 1;
+        return map.size() == 2 && map.get(dices[0]) > 1 & map.get(dices.length - 1) > 1;
     }
 
     public static boolean isLargeStraight(int[] dices) {
