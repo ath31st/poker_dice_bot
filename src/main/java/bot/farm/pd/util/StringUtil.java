@@ -26,8 +26,9 @@ public class StringUtil {
 
     public static int[] getRerollNumbers(String command) {
         return Arrays.stream(command.substring(command.indexOf(" "))
-                .trim()
-                .split(" "))
+                        .trim()
+                        .replaceAll("\\s+", " ")
+                        .split(" "))
                 .mapToInt(Integer::valueOf)
                 .toArray();
     }

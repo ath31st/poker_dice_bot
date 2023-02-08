@@ -91,7 +91,7 @@ public class RoundService {
             pr.setActionCounter(pr.getActionCounter() - 1);
 
             messageService.sendMessage(message.getChannel(),
-                    playerName + " ловко бросает кости " +
+                    StringUtil.diamondWrapperForId(userId) + " ловко бросает кости " +
                             StringUtil.resultWithBrackets(rollDices));
         }
     }
@@ -101,7 +101,7 @@ public class RoundService {
         Long userId = message.getAuthor().getIdLong();
 
         if (checkRerollOrPassAvailable(chatId, userId)) {
-            Pattern pattern = Pattern.compile("^" + REROLL.value + "( [1-6]){1,5}$");
+            Pattern pattern = Pattern.compile("^" + REROLL.value + "(\\s+[1-6]){1,5}$");
             Matcher matcher = pattern.matcher(message.getContentRaw());
 
             if (matcher.matches()) {
@@ -118,9 +118,8 @@ public class RoundService {
                 pr.getPlayers().put(userId, pir);
                 pr.setActionCounter(pr.getActionCounter() - 1);
 
-                String playerName = message.getMember().getNickname() == null ? message.getAuthor().getName() : message.getMember().getNickname();
                 messageService.sendMessage(message.getChannel(),
-                        playerName +
+                        StringUtil.diamondWrapperForId(userId) +
                                 " перебрасывает кости " +
                                 StringUtil.resultWithBrackets(reroll) + "\n" +
                                 "Получилось " + StringUtil.resultWithBrackets(firstRoll));
@@ -143,9 +142,8 @@ public class RoundService {
             pr.getPlayers().put(userId, pir);
             pr.setActionCounter(pr.getActionCounter() - 1);
 
-            String playerName = message.getMember().getNickname() == null ? message.getAuthor().getName() : message.getMember().getNickname();
             messageService.sendMessage(message.getChannel(),
-                    playerName + " с ухмылкой пропускает ход");
+                    StringUtil.diamondWrapperForId(userId) + " с ухмылкой пропускает ход");
 
             checkAvailableActions(message.getChannel(), pr);
         }
@@ -161,9 +159,8 @@ public class RoundService {
 
             rounds.remove(chatId);
 
-            String playerName = message.getMember().getNickname() == null ? message.getAuthor().getName() : message.getMember().getNickname();
             messageService.sendMessage(message.getChannel(),
-                    playerName + " досрочно завершает раунд, результаты будут аннулированы");
+                    StringUtil.diamondWrapperForId(userId) + " досрочно завершает раунд, результаты будут аннулированы");
         }
     }
 
@@ -196,6 +193,6 @@ public class RoundService {
         //todo save result!
         Map<Long, RoundResult> result = scoreService.processingRoundResult(pr);
         rounds.remove(pr.getIdChannel());
-        messageService.sendResult(channel, result);
+        messageService.sendResult(channel, result, pr.getPlayers());
     }
 }
