@@ -1,17 +1,21 @@
 package bot.farm.pd.util;
 
 public enum Combination {
-    SET("Сет"),
-    SQUARE("Каре"),
-    FULL_HOUSE("Фулл-хаус"),
-    SMALL_STRAIGHT("Короткий стрит"),
-    LARGE_STRAIGHT("Длинный стрит"),
-    POKER("Покер"),
-    CHANCE("Шанс");
+    POKER("Покер", 9),
+    SQUARE("Каре", 8),
+    FULL_HOUSE("Фулл-хаус", 7),
+    LARGE_STRAIGHT("Большой стрейт", 6),
+    SMALL_STRAIGHT("Малый стрейт", 5),
+    SET("Сет", 4),
+    TWO_PAIR("Две пары", 3),
+    PAIR("Пара", 2),
+    NOTHING("Ничего", 1);
 
     public final String value;
+    public final int priority;
 
-    Combination(String value) {
+    Combination(String value, int priority) {
         this.value = value;
+        this.priority = priority;
     }
 }
