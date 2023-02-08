@@ -33,13 +33,7 @@ public class MessageService {
         if (r1.getPriority() < r2.getPriority()) {
             return 1;
         } else if (r1.getPriority() == r2.getPriority()) {
-            if (r1.getScore() < r2.getScore()) {
-                return 1;
-            } else if (r1.getScore() == r2.getScore()) {
-                return 0;
-            } else {
-                return 0;
-            }
+            return Integer.compare(r2.getScore(), r1.getScore());
         } else {
             return -1;
         }
