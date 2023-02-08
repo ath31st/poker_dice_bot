@@ -16,8 +16,11 @@ public class DiceUtil {
 
     public static void reroll(int[] firstRoll, int[] reroll) {
         Random random = new Random();
+        Arrays.sort(reroll);
+        int point = 0;
         for (int k : reroll) {
-            for (int j = 0; j < firstRoll.length; j++) {
+            for (int j = point; j < firstRoll.length; j++) {
+                point++;
                 if (firstRoll[j] == k) {
                     firstRoll[j] = random.nextInt(1, 7);
                     break;
