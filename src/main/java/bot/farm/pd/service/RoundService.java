@@ -112,8 +112,9 @@ public class RoundService {
             pr.getPlayers().put(userId, pir);
             pr.setActionCounter(pr.getActionCounter() - 1);
 
+            String playerName = message.getMember().getNickname() == null ? message.getAuthor().getName() : message.getMember().getNickname();
             messageService.sendMessage(message.getChannel(),
-                    Objects.requireNonNull(message.getMember()).getNickname() + " ловко бросает кости " +
+                    playerName + " ловко бросает кости " +
                             StringUtil.resultWithBrackets(rollDices));
         }
     }
@@ -140,8 +141,9 @@ public class RoundService {
                 pr.getPlayers().put(userId, pir);
                 pr.setActionCounter(pr.getActionCounter() - 1);
 
+                String playerName = message.getMember().getNickname() == null ? message.getAuthor().getName() : message.getMember().getNickname();
                 messageService.sendMessage(message.getChannel(),
-                        Objects.requireNonNull(message.getMember()).getNickname() +
+                        playerName +
                                 " перебрасывает кости " +
                                 StringUtil.resultWithBrackets(reroll) + "\n" +
                                 "Получилось " + StringUtil.resultWithBrackets(firstRoll));
@@ -164,8 +166,9 @@ public class RoundService {
             pr.getPlayers().put(userId, pir);
             pr.setActionCounter(pr.getActionCounter() - 1);
 
+            String playerName = message.getMember().getNickname() == null ? message.getAuthor().getName() : message.getMember().getNickname();
             messageService.sendMessage(message.getChannel(),
-                    Objects.requireNonNull(message.getMember()).getNickname() + " с ухмылкой пропускает ход");
+                    playerName + " с ухмылкой пропускает ход");
 
             checkAvailableActions(message.getChannel(), pr);
         }
@@ -181,9 +184,9 @@ public class RoundService {
 
             rounds.remove(chatId);
 
+            String playerName = message.getMember().getNickname() == null ? message.getAuthor().getName() : message.getMember().getNickname();
             messageService.sendMessage(message.getChannel(),
-                    Objects.requireNonNull(message.getMember()).getNickname() +
-                            " досрочно завершает раунд, результаты будут аннулированы");
+                    playerName + " досрочно завершает раунд, результаты будут аннулированы");
         }
     }
 
@@ -193,6 +196,7 @@ public class RoundService {
         PokerRound pr = rounds.get(chatId);
         return pr.getPlayers().containsKey(userId) &&
                 !pr.isEnded() &&
+                !pr.getPlayers().get(userId).isRoll() &&
                 pr.getPlayers().get(userId).isReroll() &&
                 pr.getPlayers().get(userId).isPass();
     }
