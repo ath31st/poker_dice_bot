@@ -10,7 +10,7 @@ public class StringUtil {
         return userId.replaceAll("<@|>", " ").trim().replaceAll("\\s+", " ");
     }
 
-    public static String diamondWrapperForId(String userId) {
+    public static String diamondWrapperForId(Long userId) {
         return "<@" + userId + ">";
     }
 

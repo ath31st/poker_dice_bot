@@ -1,5 +1,7 @@
 package bot.farm.pd.util;
 
+import bot.farm.pd.entity.RoundResult;
+
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Date;
@@ -113,4 +115,15 @@ public class DiceUtil {
                 .flatMapToInt(x -> IntStream.of(x.getKey()))
                 .sum() * 2;
     }
+
+    public static int customComparator(RoundResult r1, RoundResult r2) {
+        if (r1.getPriority() < r2.getPriority()) {
+            return 1;
+        } else if (r1.getPriority() == r2.getPriority()) {
+            return Integer.compare(r2.getScore(), r1.getScore());
+        } else {
+            return -1;
+        }
+    }
+
 }

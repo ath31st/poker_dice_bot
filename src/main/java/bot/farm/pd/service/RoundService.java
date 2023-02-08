@@ -38,28 +38,31 @@ public class RoundService {
         Pattern pattern = Pattern.compile("^" + START.value + " (<@[0-9]{18}>\\s?){2,}$");
         Matcher matcher = pattern.matcher(startCommand);
 
+        if (!matcher.matches()) return;
+
         Map<Long, PlayerInRound> players = StringUtil.getPlayersId(startCommand).stream()
                 .collect(Collectors.toMap(Long::valueOf, v -> playerService.createPiR()));
 
-        if (matcher.matches() && players.size() > 1) {
-            String message = "Начинается новый раунд покера с костями!\n"
-                    + players.keySet().stream()
-                    .map(p -> StringUtil.diamondWrapperForId(String.valueOf(p)))
-                    .collect(Collectors.joining(" vs "));
+        if (players.size() <= 1) return;
 
-            PokerRound pr = PokerRound.builder()
-                    .players(players)
-                    .idChannel(channel.getIdLong())
-                    .playerInitiator(userInitiator)
-                    .startRound(LocalDateTime.now())
-                    .actionCounter(players.size() * 2)
-                    .isEnded(false)
-                    .build();
+        String message = "Начинается новый раунд покера с костями!\n"
+                + players.keySet().stream()
+                .map(StringUtil::diamondWrapperForId)
+                .collect(Collectors.joining(" vs "));
 
-            rounds.put(channel.getIdLong(), pr);
+        PokerRound pr = PokerRound.builder()
+                .players(players)
+                .idChannel(channel.getIdLong())
+                .playerInitiator(userInitiator)
+                .startRound(LocalDateTime.now())
+                .actionCounter(players.size() * 2)
+                .isEnded(false)
+                .build();
 
-            messageService.sendMessage(channel, message);
-        }
+        rounds.put(channel.getIdLong(), pr);
+
+        messageService.sendMessage(channel, message);
+
     }
 
     public void rollDices(Message message) {
@@ -190,10 +193,9 @@ public class RoundService {
     }
 
     private void saveResultsAndDeleteRound(MessageChannel channel, PokerRound pr) {
-        //todo print result in chat!
         //todo save result!
         Map<Long, RoundResult> result = scoreService.processingRoundResult(pr);
         rounds.remove(pr.getIdChannel());
-        messageService.sendResult(channel, result, pr.getPlayers());
+        messageService.sendResult(channel, result);
     }
 }
