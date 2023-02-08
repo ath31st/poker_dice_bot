@@ -53,12 +53,26 @@ public class ScoreService {
             rr.setPriority(Combination.SMALL_STRAIGHT.priority);
             return rr;
         } else if (isSequence(dices, 3)) {
-            rr.setScore(sequenceScore(dices));
+            rr.setScore(sequenceScore(dices, 3));
             rr.setCombination(Combination.SET);
             rr.setPriority(Combination.SET.priority);
             return rr;
+        } else if (isTwoPair(dices)) {
+            rr.setScore(scoreTwoPair(dices));
+            rr.setCombination(Combination.TWO_PAIR);
+            rr.setPriority(Combination.TWO_PAIR.priority);
+            return rr;
+        } else if (isSequence(dices, 2)) {
+            rr.setScore(sequenceScore(dices, 2));
+            rr.setCombination(Combination.PAIR);
+            rr.setPriority(Combination.PAIR.priority);
+            return rr;
+        } else {
+            rr.setScore(0);
+            rr.setCombination(Combination.NOTHING);
+            rr.setPriority(Combination.NOTHING.priority);
+            return rr;
         }
     }
-
 
 }

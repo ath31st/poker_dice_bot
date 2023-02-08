@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class DiceUtil {
     public static int[] roll5d6() {
@@ -67,7 +68,7 @@ public class DiceUtil {
         return maxCount == seq;
     }
 
-    public static int sequenceScore(int[] dices) {
+    public static int sequenceScore(int[] dices, int seq) {
         int repeateNumber = 0;
         int maxCount = 0;
         int count = 1;
@@ -82,6 +83,29 @@ public class DiceUtil {
                 count = 1;
             }
         }
-        return repeateNumber * 3;
+        return repeateNumber * seq;
+    }
+
+    public static boolean isTwoPair(int[] dices) {
+        int[] counts = new int[6];
+        int pairs = 0;
+        for (int dice : dices) {
+            counts[dice - 1]++;
+        }
+        for (int value : counts) {
+            if (value == 2) {
+                pairs++;
+            }
+        }
+        return pairs == 2;
+    }
+
+    public static int scoreTwoPair(int[] dices) {
+        Map<Integer, Long> map = Arrays.stream(dices).boxed().collect(Collectors.groupingBy(x -> x, Collectors.counting()));
+        return map.entrySet()
+                .stream()
+                .filter(x -> x.getValue() > 1)
+                .flatMapToInt(x -> IntStream.of(x.getKey()))
+                .sum() * 2;
     }
 }
