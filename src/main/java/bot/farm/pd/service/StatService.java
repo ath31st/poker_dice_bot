@@ -46,10 +46,10 @@ public class StatService {
                 .collect(Collectors.groupingBy(p -> p.getPlayer().getNickname(), Collectors.counting()));
 
         String message = "=====================\n" + "```" +
-                "Таблица лидеров недели (Топ 5):\n" +
+                "Таблица лидеров недели этого канала (Топ 5):\n" +
                 leaders.entrySet()
                         .stream()
-                        .sorted(Map.Entry.comparingByKey())
+                        .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
                         .map(p -> p.getKey() + ": {" + p.getValue() + "}")
                         .collect(Collectors.joining("\n")) + "```";
 
