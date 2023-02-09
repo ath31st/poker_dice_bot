@@ -2,6 +2,7 @@ FROM openjdk:19-alpine
 RUN mkdir /app
 COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
+RUN chmod +x mvnw
 RUN ./mvnw package
 RUN addgroup --system javauser && adduser -S -s /bin/false -G javauser javauser
 RUN chown -R javauser:javauser /app
