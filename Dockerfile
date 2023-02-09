@@ -12,7 +12,7 @@ RUN ./mvnw dependency:resolve
 #COPY target/*.jar /app/poker-dice.jar
 
 EXPOSE 28882
-#ENV TOKEN=""
+ENV TOKEN=""
 #ENTRYPOINT ["java", "-jar", "/app/poker-dice.jar", "--bot.token=${TOKEN}"]
 COPY src ./src
 CMD ["./mvnw", "spring-boot:run", "--bot.token=${TOKEN}"]
