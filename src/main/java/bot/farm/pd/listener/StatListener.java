@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import org.springframework.stereotype.Component;
 
 import static bot.farm.pd.util.Command.HELP;
+import static bot.farm.pd.util.Command.STATISTICS;
 
 @Component
 @RequiredArgsConstructor
@@ -26,6 +27,10 @@ public class StatListener {
 
         if (content.equals(HELP.value)) {
             statService.printHelpMessage(message);
+        }
+
+        if (content.equals(STATISTICS.value)) {
+            statService.getLeaderBoardByChannel(message.getChannel());
         }
     }
 }
