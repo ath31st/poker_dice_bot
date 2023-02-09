@@ -1,10 +1,10 @@
 FROM openjdk:19-alpine
 RUN mkdir /app
 RUN addgroup --system javauser && adduser -S -s /bin/false -G javauser javauser
-COPY target/*.jar /app/poker-dice.jar
-EXPOSE 28882
-ENV JAVA_OPTS=""
-WORKDIR /app
 RUN chown -R javauser:javauser /app
 USER javauser
-ENTRYPOINT ["java", "-jar", "/poker-dice.jar"]
+COPY target/*.jar /app/poker-dice.jar
+WORKDIR /app
+EXPOSE 28882
+ENV JAVA_OPTS=""
+ENTRYPOINT ["java", "-jar", "/app/poker-dice.jar", "--bot.token=$JAVA_OPTS"]
