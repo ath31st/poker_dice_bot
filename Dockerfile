@@ -1,8 +1,9 @@
 FROM openjdk:19-alpine
 RUN mkdir /app
-#RUN addgroup --system javauser && adduser -S -s /bin/false -G javauser javauser
-#RUN chown -R javauser:javauser /app
-#USER javauser
+RUN addgroup --system javauser && adduser -S -s /bin/false -G javauser javauser
+RUN chown -R javauser:javauser /app
+USER javauser
+RUN ./mvnw package
 ADD target/*.jar /app/poker-dice.jar
 WORKDIR /app
 EXPOSE 28882
