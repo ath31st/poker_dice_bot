@@ -6,5 +6,5 @@ USER javauser
 COPY target/*.jar /app/poker-dice.jar
 WORKDIR /app
 EXPOSE 28882
-ENV JAVA_OPTS=""
-ENTRYPOINT ["java", "-jar", "/app/poker-dice.jar", "--bot.token=$JAVA_OPTS"]
+ENV TOKEN=""
+ENTRYPOINT ["java", "-jar", "/app/poker-dice.jar", "--bot.token=${TOKEN}"]
