@@ -6,20 +6,19 @@ import bot.farm.pd.entity.RoundResult;
 import bot.farm.pd.util.DiceUtil;
 import bot.farm.pd.util.StringUtil;
 import lombok.RequiredArgsConstructor;
+import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static bot.farm.pd.util.Command.REROLL;
-import static bot.farm.pd.util.Command.START;
 
 @Service
 @RequiredArgsConstructor
@@ -35,32 +34,35 @@ public class RoundService {
             return;
         }
 
-        Pattern pattern = Pattern.compile("^" + START.value + " (<@[0-9]{18}>\\s?){2,}$");
-        Matcher matcher = pattern.matcher(startCommand);
+//        Pattern pattern = Pattern.compile("^" + START.value + " (<@[0-9]{18}>\\s?){2,}$");
+//        Matcher matcher = pattern.matcher(startCommand);
 
-        if (!matcher.matches()) return;
+//        if (!matcher.matches()) return;
 
-        Map<Long, PlayerInRound> players = StringUtil.getPlayersId(startCommand).stream()
-                .collect(Collectors.toMap(Long::valueOf, v -> playerService.createPiR()));
+//        Map<Long, PlayerInRound> players = StringUtil.getPlayersId(startCommand).stream()
+//                .collect(Collectors.toMap(Long::valueOf, v -> playerService.createPiR()));
 
-        if (players.size() <= 1) return;
+        Map<Long, PlayerInRound> players = new HashMap<>();
 
-        String message = "Начинается новый раунд покера с костями!\n"
-                + players.keySet().stream()
-                .map(StringUtil::diamondWrapperForId)
-                .collect(Collectors.joining(" vs "));
+//        if (players.size() <= 1) return;
+
+        String message = StringUtil.diamondWrapperForId(userInitiator) + " начинает новый раунд покера с костями!";
+//                + players.keySet().stream()
+//                .map(StringUtil::diamondWrapperForId)
+//                .collect(Collectors.joining(" vs "));
 
         PokerRound pr = PokerRound.builder()
                 .players(players)
                 .idChannel(channel.getIdLong())
                 .playerInitiator(userInitiator)
                 .startRound(LocalDateTime.now())
-                .actionCounter(players.size() * 2)
+                .actionCounter(0)
                 .isEnded(false)
                 .build();
 
         rounds.put(channel.getIdLong(), pr);
 
+        channel.getJDA().getPresence().setActivity(Activity.watching("за игрой"));
         messageService.sendMessage(channel, message);
 
     }
@@ -69,16 +71,19 @@ public class RoundService {
         Long chatId = message.getChannel().getIdLong();
         Long userId = message.getAuthor().getIdLong();
 
-        if (checkRollAvailable(chatId, userId)) {
+        if (checkRoundAvailable(chatId, userId)) {
             PokerRound pr = rounds.get(chatId);
-            PlayerInRound pir = pr.getPlayers().get(userId);
+//            PlayerInRound pir = pr.getPlayers().get(userId);
+            PlayerInRound pir = playerService.createPiR();
+            pr.setActionCounter(pr.getActionCounter() + 2);
+
             String playerName = message.getMember().getNickname() == null ?
                     message.getAuthor().getName() : message.getMember().getNickname();
 
             if (!playerService.existsPlayer(userId)) {
                 playerService.saveNewPlayer(userId,
                         message.getAuthor().getName(),
-                        Objects.requireNonNull(message.getMember()).getNickname(),
+                        playerName,
                         message.getAuthor().getDiscriminator());
             }
 
@@ -159,6 +164,7 @@ public class RoundService {
 
             rounds.remove(chatId);
 
+            message.getChannel().getJDA().getPresence().setActivity(Activity.playing("уборку игрового стола"));
             messageService.sendMessage(message.getChannel(),
                     StringUtil.diamondWrapperForId(userId) + " досрочно завершает раунд, результаты будут аннулированы");
         }
@@ -175,13 +181,13 @@ public class RoundService {
                 pr.getPlayers().get(userId).isPass();
     }
 
-    private boolean checkRollAvailable(Long chatId, Long userId) {
+    private boolean checkRoundAvailable(Long chatId, Long userId) {
         if (!rounds.containsKey(chatId)) return false;
 
         PokerRound pr = rounds.get(chatId);
         return !pr.isEnded() &&
-                pr.getPlayers().containsKey(userId) &&
-                pr.getPlayers().get(userId).isRoll();
+                !pr.getPlayers().containsKey(userId);
+        // pr.getPlayers().get(userId).isRoll();
     }
 
     private void checkAvailableActions(MessageChannel channel, PokerRound pr) {
@@ -190,9 +196,22 @@ public class RoundService {
     }
 
     private void saveResultsAndDeleteRound(MessageChannel channel, PokerRound pr) {
-        //todo save result!
+        channel.getJDA().getPresence().setActivity(Activity.playing("уборку игрового стола"));
         Map<Long, RoundResult> result = scoreService.processingRoundResult(pr);
-        rounds.remove(pr.getIdChannel());
+
         messageService.sendResult(channel, result, pr.getPlayers());
+
+        if (pr.getPlayers().size() > 1) {
+            Long winner = result.entrySet()
+                    .stream()
+                    .sorted(Map.Entry.comparingByValue(DiceUtil::customComparator))
+                    .findFirst()
+                    .get()
+                    .getKey();
+
+
+        }
+
+        rounds.remove(pr.getIdChannel());
     }
 }

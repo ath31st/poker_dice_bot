@@ -2,9 +2,8 @@ package bot.farm.pd.entity;
 
 import lombok.*;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @AllArgsConstructor
@@ -20,4 +19,6 @@ public class Player {
     private String nickname;
     private String discriminator;
     private Long score;
+    @OneToMany(fetch = FetchType.LAZY)
+    private List<Result> results;
 }

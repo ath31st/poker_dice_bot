@@ -19,7 +19,8 @@ public class MessageService {
     }
 
     public void sendResult(MessageChannel channel, Map<Long, RoundResult> result, Map<Long, PlayerInRound> players) {
-        String message = "================================================\n" +
+
+        String message = "=========================\n" +
                 "Результаты раунда:\n" + "```" +
                 result.entrySet()
                         .stream()

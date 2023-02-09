@@ -4,6 +4,7 @@ import bot.farm.pd.entity.PokerRound;
 import bot.farm.pd.service.MessageService;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -34,6 +35,7 @@ public class PokerDiceScheduler {
         while (iterator.hasNext()) {
             Map.Entry<Long, PokerRound> entry = iterator.next();
             if (entry.getValue().getStartRound().plusMinutes(duration).isBefore(LocalDateTime.now())) {
+                jda.getPresence().setActivity(Activity.playing("уборку игрового стола"));
                 messageService.sendMessage(Objects.requireNonNull(jda.getChannelById(MessageChannel.class, entry.getKey())),
                         "Время раунда подошло к концу");
                 iterator.remove();
