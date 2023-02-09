@@ -26,30 +26,18 @@ public class RoundService {
     private final MessageService messageService;
     private final PlayerService playerService;
     private final ScoreService scoreService;
+    private final StatService statService;
     private final ConcurrentHashMap<Long, PokerRound> rounds;
 
-    public void startNewRound(MessageChannel channel, String startCommand, Long userInitiator) {
+    public void startNewRound(MessageChannel channel, Long userInitiator) {
         if (rounds.containsKey(channel.getIdLong())) {
             messageService.sendMessage(channel, "Извините, игровой стол сейчас занят");
             return;
         }
 
-//        Pattern pattern = Pattern.compile("^" + START.value + " (<@[0-9]{18}>\\s?){2,}$");
-//        Matcher matcher = pattern.matcher(startCommand);
-
-//        if (!matcher.matches()) return;
-
-//        Map<Long, PlayerInRound> players = StringUtil.getPlayersId(startCommand).stream()
-//                .collect(Collectors.toMap(Long::valueOf, v -> playerService.createPiR()));
-
         Map<Long, PlayerInRound> players = new HashMap<>();
 
-//        if (players.size() <= 1) return;
-
         String message = StringUtil.diamondWrapperForId(userInitiator) + " начинает новый раунд покера с костями!";
-//                + players.keySet().stream()
-//                .map(StringUtil::diamondWrapperForId)
-//                .collect(Collectors.joining(" vs "));
 
         PokerRound pr = PokerRound.builder()
                 .players(players)
@@ -73,7 +61,6 @@ public class RoundService {
 
         if (checkRoundAvailable(chatId, userId)) {
             PokerRound pr = rounds.get(chatId);
-//            PlayerInRound pir = pr.getPlayers().get(userId);
             PlayerInRound pir = playerService.createPiR();
             pr.setActionCounter(pr.getActionCounter() + 2);
 
@@ -85,6 +72,8 @@ public class RoundService {
                         message.getAuthor().getName(),
                         playerName,
                         message.getAuthor().getDiscriminator());
+            } else {
+                playerService.checkAndUpdateNickname(userId, playerName);
             }
 
             int[] rollDices = DiceUtil.roll5d6();
@@ -187,7 +176,6 @@ public class RoundService {
         PokerRound pr = rounds.get(chatId);
         return !pr.isEnded() &&
                 !pr.getPlayers().containsKey(userId);
-        // pr.getPlayers().get(userId).isRoll();
     }
 
     private void checkAvailableActions(MessageChannel channel, PokerRound pr) {
@@ -209,7 +197,7 @@ public class RoundService {
                     .get()
                     .getKey();
 
-
+            statService.saveRoundResult(channel.getIdLong(), winner);
         }
 
         rounds.remove(pr.getIdChannel());

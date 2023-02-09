@@ -25,7 +25,7 @@ public class RoundListener {
         if (!content.startsWith("!") || content.length() > 200) return;
 
         if (content.equals(START.value)) {
-            roundService.startNewRound(message.getChannel(), content, message.getAuthor().getIdLong());
+            roundService.startNewRound(message.getChannel(), message.getAuthor().getIdLong());
         }
         if (content.equals(ROLL.value)) {
             roundService.rollDices(message);

@@ -6,6 +6,7 @@ import bot.farm.pd.repository.PlayerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.Optional;
 
 @Service
@@ -13,24 +14,30 @@ import java.util.Optional;
 public class PlayerService {
     private final PlayerRepository playerRepository;
 
+    @Transactional
     public void saveNewPlayer(Long id, String username, String nickname, String discriminator) {
         Player p = Player.builder()
                 .id(id)
                 .username(username)
                 .nickname(nickname)
                 .discriminator(discriminator)
-                .score(0L)
                 .build();
 
         playerRepository.save(p);
     }
 
-    public Optional<Player> getPlayerById(Long id) {
-        return playerRepository.findById(id);
+    public Optional<Player> getPlayerById(Long userId) {
+        return playerRepository.findById(userId);
     }
 
-    public boolean existsPlayer(Long id) {
-        return playerRepository.existsById(id);
+    public boolean existsPlayer(Long userId) {
+        return playerRepository.existsById(userId);
+    }
+
+    public void checkAndUpdateNickname(Long userId, String nickname) {
+        if (playerRepository.existsByIdAndNickname(userId,nickname)) return;
+
+        playerRepository.updateNicknameById(nickname,userId);
     }
 
     public PlayerInRound createPiR() {

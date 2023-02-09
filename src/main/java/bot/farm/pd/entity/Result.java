@@ -1,12 +1,13 @@
 package bot.farm.pd.entity;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+
 @Entity
+@AllArgsConstructor
+@Builder
 @Getter
 @Setter
 @NoArgsConstructor
@@ -16,11 +17,10 @@ public class Result {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
-
     @ManyToOne
     @JoinColumn(name = "player_id")
     private Player player;
-    private LocalDateTime localDateTime;
+    private LocalDateTime roundTime;
     private long idChannel;
 
 }
