@@ -3,7 +3,7 @@ RUN mkdir /app
 RUN addgroup --system javauser && adduser -S -s /bin/false -G javauser javauser
 RUN chown -R javauser:javauser /app
 USER javauser
-COPY target/*.jar /app/poker-dice.jar
+ADD target/*.jar /app/poker-dice.jar
 WORKDIR /app
 EXPOSE 28882
 ENV TOKEN=""
