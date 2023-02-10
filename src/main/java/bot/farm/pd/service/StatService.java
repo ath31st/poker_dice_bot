@@ -51,6 +51,7 @@ public class StatService {
                 leaders.entrySet()
                         .stream()
                         .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                        .limit(5)
                         .map(p -> p.getKey() + ": {" + p.getValue() + "}")
                         .collect(Collectors.joining("\n")) + "```";
 
