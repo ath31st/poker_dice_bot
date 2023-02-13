@@ -16,17 +16,18 @@
 
 ## Примеры работы
 
-Начало раунда:
-![image info](images/!poker.jpg)
-Бросок костей:
-![image info](images/!roll.jpg)
-Переброс неподходящих под комбинацию костей:
-![image info](images/!reroll.jpg)
-Вызов статистики по каналу:
-![image info](images/!stat.jpg)
+Начало раунда:</b>
+![image info](images/!poker.jpg)</b>
+Бросок костей:</b>
+![image info](images/!roll.jpg)</b>
+Переброс неподходящих под комбинацию костей:</b>
+![image info](images/!reroll.jpg)</b>
+Вызов статистики по каналу:</b>
+![image info](images/!stat.jpg)</b>
 
 ## Как запустить
 
+Для запуска необходим установленный docker на сервере.
 Этот скрипт скопирует проект с гита, сбилдит его на вашем сервере, затем запустит с указаным токеном:
 
 ```bash
