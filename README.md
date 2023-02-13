@@ -16,14 +16,14 @@
 
 ## Примеры работы
 
-Начало раунда:</b>
-![image info](images/!poker.jpg)</b>
-Бросок костей:</b>
-![image info](images/!roll.jpg)</b>
-Переброс неподходящих под комбинацию костей:</b>
-![image info](images/!reroll.jpg)</b>
-Вызов статистики по каналу:</b>
-![image info](images/!stat.jpg)</b>
+Начало раунда:</br>
+![image info](images/!poker.jpg)</br>
+Бросок костей:</br>
+![image info](images/!roll.jpg)</br>
+Переброс неподходящих под комбинацию костей:</br>
+![image info](images/!reroll.jpg)</br>
+Вызов статистики по каналу:</br>
+![image info](images/!stat.jpg)</br>
 
 ## Как запустить
 
