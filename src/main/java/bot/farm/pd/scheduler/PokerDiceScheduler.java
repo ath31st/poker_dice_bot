@@ -3,6 +3,7 @@ package bot.farm.pd.scheduler;
 import bot.farm.pd.entity.PokerRound;
 import bot.farm.pd.service.MessageService;
 import bot.farm.pd.service.RoundService;
+import bot.farm.pd.util.RandomPhrase;
 import bot.farm.pd.util.StringUtil;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.JDA;
@@ -19,6 +20,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static bot.farm.pd.util.MessageEnum.ACTIVITY_CLEANING_TABLE;
+import static bot.farm.pd.util.MessageEnum.TIME_EXPIRED;
 
 @Configuration
 @EnableScheduling
@@ -38,19 +42,18 @@ public class PokerDiceScheduler {
         while (iterator.hasNext()) {
             Map.Entry<Long, PokerRound> entry = iterator.next();
             if (entry.getValue().getStartRound().plusMinutes(duration).isBefore(LocalDateTime.now())) {
-                jda.getPresence().setActivity(Activity.playing("уборку игрового стола"));
+                jda.getPresence().setActivity(Activity.playing(ACTIVITY_CLEANING_TABLE.value));
 
                 MessageChannel channel = jda.getChannelById(MessageChannel.class, entry.getKey());
                 if (channel != null) {
-                    messageService.sendMessage(channel, "Время раунда подошло к концу");
+                    messageService.sendMessage(channel, TIME_EXPIRED.value);
 
                     PokerRound pr = entry.getValue();
                     pr.getPlayers().entrySet()
                             .stream()
                             .filter(e -> e.getValue().isReroll() && e.getValue().isPass())
-                            .forEach(e -> messageService.sendMessage(channel, "Угадайте, что снится " +
-                                    StringUtil.diamondWrapperForId(e.getKey()) +
-                                            "? Автоматический пропуск хода! Принесите ему(ей) одеяло"));
+                            .forEach(e -> messageService.sendMessage(channel,
+                                    String.format(RandomPhrase.getAutoPassPhrase(),StringUtil.diamondWrapperForId(e.getKey()))));
                     roundService.saveResultsAndDeleteRound(channel, pr);
                 } else {
                     iterator.remove();

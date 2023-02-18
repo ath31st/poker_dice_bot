@@ -4,6 +4,7 @@ import bot.farm.pd.entity.PlayerInRound;
 import bot.farm.pd.entity.PokerRound;
 import bot.farm.pd.entity.RoundResult;
 import bot.farm.pd.util.DiceUtil;
+import bot.farm.pd.util.RandomPhrase;
 import bot.farm.pd.util.StringUtil;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.entities.Activity;
@@ -19,6 +20,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static bot.farm.pd.util.Command.REROLL;
+import static bot.farm.pd.util.MessageEnum.*;
+
 
 @Service
 @RequiredArgsConstructor
@@ -31,13 +34,13 @@ public class RoundService {
 
     public void startNewRound(MessageChannel channel, Long userInitiator) {
         if (rounds.containsKey(channel.getIdLong())) {
-            messageService.sendMessage(channel, "Извините, игровой стол сейчас занят");
+            messageService.sendMessage(channel, TABLE_BUSY.value);
             return;
         }
 
         Map<Long, PlayerInRound> players = new HashMap<>();
 
-        String message = StringUtil.diamondWrapperForId(userInitiator) + " начинает новый раунд покера с костями!";
+        String message = String.format(START_ROUND.value, StringUtil.diamondWrapperForId(userInitiator));
 
         PokerRound pr = PokerRound.builder()
                 .players(players)
@@ -50,7 +53,7 @@ public class RoundService {
 
         rounds.put(channel.getIdLong(), pr);
 
-        channel.getJDA().getPresence().setActivity(Activity.watching("за игрой"));
+        channel.getJDA().getPresence().setActivity(Activity.watching(ACTIVITY_FOR_GAME.value));
         messageService.sendMessage(channel, message);
 
     }
@@ -85,8 +88,9 @@ public class RoundService {
             pr.setActionCounter(pr.getActionCounter() - 1);
 
             messageService.sendMessage(message.getChannel(),
-                    StringUtil.diamondWrapperForId(userId) + " ловко бросает кости " +
-                            StringUtil.resultWithBrackets(rollDices));
+                    String.format(RandomPhrase.getRollDicesPhrase(),
+                            StringUtil.diamondWrapperForId(userId),
+                            StringUtil.resultWithBrackets(rollDices)));
         }
     }
 
@@ -112,11 +116,10 @@ public class RoundService {
                 pr.getPlayers().put(userId, pir);
                 pr.setActionCounter(pr.getActionCounter() - 1);
 
-                messageService.sendMessage(message.getChannel(),
-                        StringUtil.diamondWrapperForId(userId) +
-                                " перебрасывает кости " +
-                                StringUtil.resultWithBrackets(reroll) + "\n" +
-                                "Получилось " + StringUtil.resultWithBrackets(firstRoll));
+                messageService.sendMessage(message.getChannel(), String.format(RandomPhrase.getRerollPhrase(),
+                        StringUtil.diamondWrapperForId(userId),
+                        StringUtil.resultWithBrackets(reroll),
+                        StringUtil.resultWithBrackets(firstRoll)));
 
                 checkAvailableActions(message.getChannel(), pr);
             }
@@ -136,8 +139,7 @@ public class RoundService {
             pr.getPlayers().put(userId, pir);
             pr.setActionCounter(pr.getActionCounter() - 1);
 
-            messageService.sendMessage(message.getChannel(),
-                    StringUtil.diamondWrapperForId(userId) + " с ухмылкой пропускает ход");
+            messageService.sendMessage(message.getChannel(), String.format(RandomPhrase.getPassPhrase(), StringUtil.diamondWrapperForId(userId)));
 
             checkAvailableActions(message.getChannel(), pr);
         }
@@ -153,9 +155,8 @@ public class RoundService {
 
             rounds.remove(chatId);
 
-            message.getChannel().getJDA().getPresence().setActivity(Activity.playing("уборку игрового стола"));
-            messageService.sendMessage(message.getChannel(),
-                    StringUtil.diamondWrapperForId(userId) + " досрочно завершает раунд, результаты будут аннулированы");
+            message.getChannel().getJDA().getPresence().setActivity(Activity.playing(ACTIVITY_CLEANING_TABLE.value));
+            messageService.sendMessage(message.getChannel(), String.format(FINISH_ROUND.value, StringUtil.diamondWrapperForId(userId)));
         }
     }
 
@@ -184,7 +185,7 @@ public class RoundService {
     }
 
     public void saveResultsAndDeleteRound(MessageChannel channel, PokerRound pr) {
-        channel.getJDA().getPresence().setActivity(Activity.playing("уборку игрового стола"));
+        channel.getJDA().getPresence().setActivity(Activity.playing(ACTIVITY_CLEANING_TABLE.value));
         Map<Long, RoundResult> result = scoreService.processingRoundResult(pr);
 
         messageService.sendResult(channel, result, pr.getPlayers());
