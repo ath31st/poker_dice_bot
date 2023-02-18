@@ -2,7 +2,6 @@ package bot.farm.pd.service;
 
 import bot.farm.pd.entity.Result;
 import bot.farm.pd.repository.ResultRepository;
-import bot.farm.pd.util.Help;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
@@ -15,6 +14,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static bot.farm.pd.util.MessageEnum.COMBINATION;
+import static bot.farm.pd.util.MessageEnum.HELP;
+
 @Service
 @RequiredArgsConstructor
 public class StatService {
@@ -24,7 +26,11 @@ public class StatService {
 
 
     public void printHelpMessage(Message message) {
-        messageService.sendMessage(message.getChannel(), Help.HELP.value);
+        messageService.sendMessage(message.getChannel(), HELP.value);
+    }
+
+    public void printComboMessage(Message message) {
+        messageService.sendMessage(message.getChannel(), COMBINATION.value);
     }
 
     @Transactional

@@ -22,7 +22,7 @@ public class RandomPhrase {
         rollDices.add("%s hehe, boy %s");
         rollDices.add("%s совершает героический бросок костей %s");
         rollDices.add("Поглядите на %s, до чего же хорош его(ее) бросок %s");
-        rollDices.add("Ведите летописца сюда, %s выбросил легендарные %s");
+        rollDices.add("Ведите летописца, %s выбросил легендарные %s");
 
         rerollDices.add("%s с надеждой перебрасывает кости %s\nПолучилось %s");
         rerollDices.add("%s дует на кости %s перед перебросом\nПолучилось %s");

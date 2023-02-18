@@ -7,6 +7,7 @@ public enum Command {
     PASS("!pass"),
     FINISH("!finish"),
     HELP("!help"),
+    COMBINATION("!combo"),
     STATISTICS("!stat");
 
     public final String value;
