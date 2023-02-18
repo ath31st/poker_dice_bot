@@ -2,6 +2,8 @@ package bot.farm.pd.scheduler;
 
 import bot.farm.pd.entity.PokerRound;
 import bot.farm.pd.service.MessageService;
+import bot.farm.pd.service.RoundService;
+import bot.farm.pd.util.StringUtil;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Activity;
@@ -27,6 +29,7 @@ public class PokerDiceScheduler {
     private int duration;
     private final JDA jda;
     private final MessageService messageService;
+    private final RoundService roundService;
     private final ConcurrentHashMap<Long, PokerRound> rounds;
 
     @Scheduled(fixedDelay = 15000)
@@ -36,9 +39,22 @@ public class PokerDiceScheduler {
             Map.Entry<Long, PokerRound> entry = iterator.next();
             if (entry.getValue().getStartRound().plusMinutes(duration).isBefore(LocalDateTime.now())) {
                 jda.getPresence().setActivity(Activity.playing("уборку игрового стола"));
-                messageService.sendMessage(Objects.requireNonNull(jda.getChannelById(MessageChannel.class, entry.getKey())),
-                        "Время раунда подошло к концу");
-                iterator.remove();
+
+                MessageChannel channel = jda.getChannelById(MessageChannel.class, entry.getKey());
+                if (channel != null) {
+                    messageService.sendMessage(channel, "Время раунда подошло к концу");
+
+                    PokerRound pr = entry.getValue();
+                    pr.getPlayers().entrySet()
+                            .stream()
+                            .filter(e -> e.getValue().isReroll() && e.getValue().isPass())
+                            .forEach(e -> messageService.sendMessage(channel, "Угадайте, что снится " +
+                                    StringUtil.diamondWrapperForId(e.getKey()) +
+                                            "? Автоматический пропуск хода! Принесите ему(ей) одеяло"));
+                    roundService.saveResultsAndDeleteRound(channel, pr);
+                } else {
+                    iterator.remove();
+                }
             }
         }
     }

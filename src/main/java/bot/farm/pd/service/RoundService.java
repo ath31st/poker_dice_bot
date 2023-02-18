@@ -183,7 +183,7 @@ public class RoundService {
         saveResultsAndDeleteRound(channel, pr);
     }
 
-    private void saveResultsAndDeleteRound(MessageChannel channel, PokerRound pr) {
+    public void saveResultsAndDeleteRound(MessageChannel channel, PokerRound pr) {
         channel.getJDA().getPresence().setActivity(Activity.playing("уборку игрового стола"));
         Map<Long, RoundResult> result = scoreService.processingRoundResult(pr);
 
