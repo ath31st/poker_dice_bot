@@ -11,7 +11,7 @@ import bot.farm.pd.util.StringUtil;
 import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Activity;
@@ -32,7 +32,7 @@ public class PokerDiceScheduler {
   private final JDA jda;
   private final MessageService messageService;
   private final RoundService roundService;
-  private final ConcurrentHashMap<Long, PokerRound> rounds;
+  private final ConcurrentMap<Long, PokerRound> rounds;
 
   @Scheduled(fixedDelay = 15000)
   public void finalizeRounds() {
@@ -51,7 +51,8 @@ public class PokerDiceScheduler {
               .stream()
               .filter(e -> e.getValue().isReroll() && e.getValue().isPass())
               .forEach(e -> messageService.sendMessage(channel,
-                  String.format(RandomPhrase.getAutoPassPhrase(), StringUtil.diamondWrapperForId(e.getKey()))));
+                  String.format(RandomPhrase.getAutoPassPhrase(),
+                      StringUtil.diamondWrapperForId(e.getKey()))));
           roundService.saveResultsAndDeleteRound(channel, pr);
         } else {
           iterator.remove();

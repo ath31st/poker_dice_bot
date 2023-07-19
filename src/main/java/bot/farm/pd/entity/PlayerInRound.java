@@ -16,5 +16,4 @@ public class PlayerInRound {
   private boolean isPass;
   private int[] dices;
   private int score;
-
 }

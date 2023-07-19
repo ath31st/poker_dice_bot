@@ -17,15 +17,16 @@ public class MessageService {
     channel.sendMessage(message).queue();
   }
 
-  public void sendResult(MessageChannel channel, Map<Long, RoundResult> result, Map<Long, PlayerInRound> players) {
-
+  public void sendResult(MessageChannel channel,
+                         Map<Long, RoundResult> result,
+                         Map<Long, PlayerInRound> players) {
     String message = "=====================\n" +
         "Результаты раунда:\n" + "```" +
         result.entrySet()
             .stream()
             .sorted(Map.Entry.comparingByValue(DiceUtil::customComparator))
-            .map(p -> players.get(p.getKey()).getName() + ": " + p.getValue().getCombination().value +
-                " {" + p.getValue().getScore() + "}")
+            .map(p -> players.get(p.getKey()).getName() + ": "
+                + p.getValue().getCombination().value + " {" + p.getValue().getScore() + "}")
             .collect(Collectors.joining("\n")) + "```";
 
     channel.sendMessage(message).queue();

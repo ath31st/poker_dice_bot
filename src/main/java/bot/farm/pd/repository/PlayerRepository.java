@@ -17,6 +17,4 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
 
   @Override
   boolean existsById(@NotNull Long aLong);
-
-
 }

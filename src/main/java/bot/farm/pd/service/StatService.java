@@ -36,7 +36,7 @@ public class StatService {
   public void saveRoundResult(Long channelId, Long idWinner) {
     Result result = Result.builder()
         .idChannel(channelId)
-        .player(playerService.getPlayerById(idWinner).get())
+        .player(playerService.getPlayerById(idWinner).orElseThrow())
         .roundTime(LocalDateTime.now())
         .build();
 

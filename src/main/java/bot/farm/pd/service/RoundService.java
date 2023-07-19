@@ -16,7 +16,7 @@ import bot.farm.pd.util.StringUtil;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +33,7 @@ public class RoundService {
   private final PlayerService playerService;
   private final ScoreService scoreService;
   private final StatService statService;
-  private final ConcurrentHashMap<Long, PokerRound> rounds;
+  private final ConcurrentMap<Long, PokerRound> rounds;
 
   public void startNewRound(MessageChannel channel, Long userInitiator) {
     if (rounds.containsKey(channel.getIdLong())) {
@@ -43,7 +43,8 @@ public class RoundService {
 
     Map<Long, PlayerInRound> players = new HashMap<>();
 
-    String message = String.format(START_ROUND.value, StringUtil.diamondWrapperForId(userInitiator));
+    String message = String.format(START_ROUND.value,
+        StringUtil.diamondWrapperForId(userInitiator));
 
     PokerRound pr = PokerRound.builder()
         .players(players)
@@ -119,10 +120,11 @@ public class RoundService {
         pr.getPlayers().put(userId, pir);
         pr.setActionCounter(pr.getActionCounter() - 1);
 
-        messageService.sendMessage(message.getChannel(), String.format(RandomPhrase.getRerollPhrase(),
-            StringUtil.diamondWrapperForId(userId),
-            StringUtil.resultWithBrackets(reroll),
-            StringUtil.resultWithBrackets(firstRoll)));
+        messageService.sendMessage(message.getChannel(),
+            String.format(RandomPhrase.getRerollPhrase(),
+                StringUtil.diamondWrapperForId(userId),
+                StringUtil.resultWithBrackets(reroll),
+                StringUtil.resultWithBrackets(firstRoll)));
 
         checkAvailableActions(message.getChannel(), pr);
       }
@@ -142,7 +144,8 @@ public class RoundService {
       pr.getPlayers().put(userId, pir);
       pr.setActionCounter(pr.getActionCounter() - 1);
 
-      messageService.sendMessage(message.getChannel(), String.format(RandomPhrase.getPassPhrase(), StringUtil.diamondWrapperForId(userId)));
+      messageService.sendMessage(message.getChannel(),
+          String.format(RandomPhrase.getPassPhrase(), StringUtil.diamondWrapperForId(userId)));
 
       checkAvailableActions(message.getChannel(), pr);
     }
@@ -158,8 +161,10 @@ public class RoundService {
 
       rounds.remove(chatId);
 
-      message.getChannel().getJDA().getPresence().setActivity(Activity.playing(ACTIVITY_CLEANING_TABLE.value));
-      messageService.sendMessage(message.getChannel(), String.format(FINISH_ROUND.value, StringUtil.diamondWrapperForId(userId)));
+      message.getChannel().getJDA().getPresence()
+          .setActivity(Activity.playing(ACTIVITY_CLEANING_TABLE.value));
+      messageService.sendMessage(message.getChannel(),
+          String.format(FINISH_ROUND.value, StringUtil.diamondWrapperForId(userId)));
     }
   }
 
@@ -198,7 +203,7 @@ public class RoundService {
           .stream()
           .sorted(Map.Entry.comparingByValue(DiceUtil::customComparator))
           .findFirst()
-          .get()
+          .orElseThrow()
           .getKey();
 
       statService.saveRoundResult(channel.getIdLong(), winner);
