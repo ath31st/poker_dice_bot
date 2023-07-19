@@ -12,23 +12,21 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import javax.annotation.PostConstruct;
-
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
 public class BotConfig {
-    private final RoundListener roundListener;
-    private final StatListener statListener;
-    @Value("${bot.token}")
-    private String token;
+  private final RoundListener roundListener;
+  private final StatListener statListener;
+  @Value("${bot.token}")
+  private String token;
 
-    @Bean
-    JDA jda() {
-        return JDABuilder.createDefault(token)
-                .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES, GatewayIntent.DIRECT_MESSAGES)
-                .setEventManager(new AnnotatedEventManager())
-                .addEventListeners(roundListener, statListener)
-                .build();
-    }
+  @Bean
+  JDA jda() {
+    return JDABuilder.createDefault(token)
+        .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES, GatewayIntent.DIRECT_MESSAGES)
+        .setEventManager(new AnnotatedEventManager())
+        .addEventListeners(roundListener, statListener)
+        .build();
+  }
 }

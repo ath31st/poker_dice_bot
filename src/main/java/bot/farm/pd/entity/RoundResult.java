@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class RoundResult {
-    private int score;
-    private Combination combination;
-    private int priority;
+  private int score;
+  private Combination combination;
+  private int priority;
 }
