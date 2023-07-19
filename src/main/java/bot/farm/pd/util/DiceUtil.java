@@ -7,7 +7,9 @@ import java.util.Date;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import lombok.experimental.UtilityClass;
 
+@UtilityClass
 public class DiceUtil {
   public static int generateRandomInteger(int min, int max) {
     SecureRandom random = new SecureRandom();
@@ -47,7 +49,7 @@ public class DiceUtil {
 
   public static boolean isFullHouse(int[] dices) {
     Map<Integer, Long> map = Arrays.stream(dices).boxed().collect(Collectors.groupingBy(x -> x, Collectors.counting()));
-    return map.size() == 2 && map.get(dices[0]) > 1 & map.get(dices[dices.length - 1]) > 1;
+    return map.size() == 2 && map.get(dices[0]) > 1 && map.get(dices[dices.length - 1]) > 1;
   }
 
   public static boolean isLargeStraight(int[] dices) {

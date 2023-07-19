@@ -3,9 +3,10 @@ package bot.farm.pd.util;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.experimental.UtilityClass;
 
+@UtilityClass
 public class StringUtil {
-
   public static String getIdFromBrackets(String userId) {
     return userId.replaceAll("<@|>", " ").trim().replaceAll("\\s+", " ");
   }

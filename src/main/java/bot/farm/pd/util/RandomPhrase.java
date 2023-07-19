@@ -2,12 +2,14 @@ package bot.farm.pd.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import lombok.experimental.UtilityClass;
 
+@UtilityClass
 public class RandomPhrase {
-  private final static List<String> autoPass = new ArrayList<>();
-  private final static List<String> rollDices = new ArrayList<>();
-  private final static List<String> rerollDices = new ArrayList<>();
-  private final static List<String> pass = new ArrayList<>();
+  private static final List<String> autoPass = new ArrayList<>();
+  private static final List<String> rollDices = new ArrayList<>();
+  private static final List<String> rerollDices = new ArrayList<>();
+  private static final List<String> pass = new ArrayList<>();
 
   static {
     autoPass.add("Угадайте, что снится %s? Автоматический пропуск хода! Принесите ему(ей) одеяло");
