@@ -26,10 +26,10 @@ public class DiceUtil {
     return arr;
   }
 
-  public static void reroll(int[] firstRoll, int[] reroll) {
-    Arrays.sort(reroll);
+  public static void reroll(int[] firstRoll, int[] rerolled) {
+    Arrays.sort(rerolled);
     int point = 0;
-    for (int k : reroll) {
+    for (int k : rerolled) {
       for (int j = point; j < firstRoll.length; j++) {
         point++;
         if (firstRoll[j] == k) {
